@@ -25,8 +25,8 @@ services:
     restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime
-      - /var/lib/nextcloud/app:/var/www/html
-      - /var/lib/nextcloud/config:/var/www/html/config
+      - /cube_pool/nextcloud/app:/var/www/html
+      - /cube_pool/nextcloud/config:/var/www/html/config
       - /cube_pool/nextcloud/data:/var/www/html/data
 
   cron:
@@ -76,7 +76,7 @@ services:
       - "55181:80"
     restart: unless-stopped
     volumes:
-      - /var/lib/nextcloud/app:/var/www/html:ro
+      - /cube_pool/nextcloud/app:/var/www/html:ro
 
   cache:
     build: ./redis
@@ -98,4 +98,4 @@ services:
       interval: 5s
     restart: unless-stopped
     volumes:
-      - /var/lib/nextcloud/db:/var/lib/postgresql/data
+      - /cube_pool/nextcloud/db:/var/lib/postgresql/data
