@@ -27,7 +27,7 @@ services:
       - /etc/localtime:/etc/localtime
       - app:/var/www/html
       - config:/var/www/html/config
-      - /cube_ocean/_data:/var/www/html/data
+      - /cube_ocean/nextcloud_data:/var/www/html/data
 
   cron:
     depends_on:
