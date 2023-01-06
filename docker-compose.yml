@@ -11,8 +11,8 @@ services:
     environment:
       - NEXTCLOUD_ADMIN_USER=admin
       - NEXTCLOUD_ADMIN_PASSWORD=admin
-      - NEXTCLOUD_TRUSTED_DOMAINS=webserver # Append your domain here
-      - TRUSTED_PROXIES=172.16.0.0/12
+      - NEXTCLOUD_TRUSTED_DOMAINS=webserver ffaabbii.de # Append your domain here
+      - TRUSTED_PROXIES=172.30.0.0/12
     env_file:
       - ./cache.env
       - ./db.env
@@ -57,10 +57,10 @@ services:
       - ./nextcloud.env
     environment:
       - NEXTCLOUD_URL=http://webserver
-      - PORT=52191
+      - PORT=52192
     image: nextcloud-app
     ports:
-      - "52191:52191"
+      - "52192:52192"
     restart: unless-stopped
     stop_signal: SIGKILL
     user: www-data
@@ -73,7 +73,7 @@ services:
       app:
         condition: service_started
     ports:
-      - "55181:80"
+      - "55182:80"
     restart: unless-stopped
     volumes:
       - app:/var/www/html:ro
