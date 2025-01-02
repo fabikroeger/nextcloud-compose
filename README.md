@@ -103,7 +103,7 @@ location / {
 
 ```bash
 docker compose up -d db
-docker compose exec -T -e PGUSER="nextcloud" -e PGPASSWORD="nextcloud" db pg_dumpall > dump.sql
+docker compose exec -T -e PGUSER="nextcloud" -e PGPASSWORD="nextcloud" db pg_dumpall --no-role-passwords > dump.sql
 docker compose down
 ```
 
@@ -138,4 +138,11 @@ docker compose run --rm -e PGUSER="nextcloud" -e PGPASSWORD="nextcloud" db pg_ch
 
 # Check integrity
 docker compose run --rm -e PGUSER="nextcloud" -e PGPASSWORD="nextcloud" db pg_checksums -c
+```
+
+### Imaginary
+
+```bash
+./occ config:system:set preview_imaginary_url --value="http://imaginary:9000"
+./occ config:system:set enabledPreviewProviders 0 --value="OC\\Preview\\Imaginary"
 ```

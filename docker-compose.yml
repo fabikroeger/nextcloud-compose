@@ -1,14 +1,15 @@
-version: '3'
-
 services:
   app:
     build: ./nextcloud
     depends_on:
       cache:
         condition: service_healthy
-      db:
+      database:
+        condition: service_healthy
+      imaginary:
         condition: service_healthy
     environment:
+<<<<<<< HEAD
       - NEXTCLOUD_ADMIN_USER=admin
       - NEXTCLOUD_ADMIN_PASSWORD=admin
       - NEXTCLOUD_TRUSTED_DOMAINS=webserver ffaabbii.de # Append your domain here
@@ -17,56 +18,69 @@ services:
       - ./cache.env
       - ./db.env
       - ./nextcloud.env
+=======
+      - PHP_MEMORY_LIMIT=1024M
+      - PHP_UPLOAD_LIMIT=1024G
+>>>>>>> upstream_caspar/main
     healthcheck:
-      test: sudo -u www-data sh -c "PHP_MEMORY_LIMIT=1G php /var/www/html/occ status --output=json | jq -e 'select(.installed==true and .maintenance==false)'" || exit 1
-      start_period: 60s
+      test: curl -sSf http://localhost/status.php | jq -e '(.installed==true) and (.maintenance==false) and (.needsDbUpgrade==false)'
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
     hostname: app
-    image: nextcloud-app
+    image: app
+    ports:
+      - "55181:80"
     restart: unless-stopped
     volumes:
+<<<<<<< HEAD
       - /etc/localtime:/etc/localtime
       - app:/var/www/html
       - config:/var/www/html/config
       - /cube_pool_mk_ii/tub/nextcloud_data:/var/www/html/data
+=======
+      - /pool-1/nextcloud/app:/var/www/html
+      - /pool-1/nextcloud/config:/var/www/html/config
+      - /pool-1/nextcloud/custom_apps:/var/www/html/custom_apps
+      - /pool-0/nextcloud/data:/var/www/html/data
+>>>>>>> upstream_caspar/main
 
   cron:
     depends_on:
       app:
         condition: service_healthy
     entrypoint: ["/cron.sh"]
-    env_file:
-      - ./cache.env
-      - ./db.env
-      - ./nextcloud.env
-    image: nextcloud-app
+    image: app
     restart: unless-stopped
     stop_signal: SIGKILL
     volumes_from:
       - app
 
-  hpb:
+  notify_push:
     depends_on:
       app:
         condition: service_healthy
-      webserver:
-        condition: service_started
-    entrypoint: ["/hpb.sh"]
-    env_file:
-      - ./cache.env
-      - ./db.env
-      - ./nextcloud.env
+    entrypoint: ["/notify_push.sh"]
     environment:
+<<<<<<< HEAD
       - NEXTCLOUD_URL=http://webserver
       - PORT=52192
     image: nextcloud-app
     ports:
       - "52192:52192"
+=======
+      - NEXTCLOUD_URL=http://app
+    image: app
+    ports:
+      - "7867:7867"
+>>>>>>> upstream_caspar/main
     restart: unless-stopped
     stop_signal: SIGKILL
     user: www-data
     volumes_from:
       - app
 
+<<<<<<< HEAD
   webserver:
     build: ./nginx
     depends_on:
@@ -77,27 +91,33 @@ services:
     restart: unless-stopped
     volumes:
       - app:/var/www/html:ro
+=======
+  imaginary:
+    build: ./imaginary
+    environment:
+      - MALLOC_ARENA_MAX=2
+    healthcheck:
+      test: curl -sSf http://localhost:9000/health
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
+    restart: unless-stopped
+>>>>>>> upstream_caspar/main
 
   cache:
     build: ./redis
-    env_file:
-      - ./cache.env
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_IO_THREADS=8
+      - REDIS_IO_THREADS_DO_READS=yes
     healthcheck:
       test: redis-cli ping || exit 1
-      interval: 5s
-    restart: unless-stopped
-    tmpfs:
-      - /data
-
-  db:
-    build: ./postgres
-    env_file:
-      - ./db.env
-    healthcheck:
-      test: pg_isready -U nextcloud || exit 1
-      interval: 5s
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
     restart: unless-stopped
     volumes:
+<<<<<<< HEAD
       - db:/var/lib/postgresql/data
 
 volumes:
@@ -105,3 +125,24 @@ volumes:
   config:
   data:
   db:
+=======
+      - /pool-1/nextcloud/cache:/bitnami/redis
+
+  database:
+    build: ./postgresql
+    environment:
+      - POSTGRESQL_DATABASE=nextcloud
+      - POSTGRESQL_PASSWORD=nextcloud
+      - POSTGRESQL_USERNAME=nextcloud
+    healthcheck:
+      test: pg_isready -U nextcloud || exit 1
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
+    restart: unless-stopped
+    volumes:
+      - /pool-1/nextcloud/database:/bitnami/postgresql
+    tmpfs:
+      - /docker-entrypoint-preinitdb.d
+      - /docker-entrypoint-initdb.d
+>>>>>>> upstream_caspar/main
