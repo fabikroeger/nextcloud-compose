@@ -87,7 +87,7 @@ services:
     restart: unless-stopped
 volumes:
     -/nextcloud/cache:/bitnami/redis
- database:
+database:
     build: ./postgresql
     environment:
       - POSTGRESQL_DATABASE=nextcloud
