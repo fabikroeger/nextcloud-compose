@@ -85,9 +85,9 @@ services:
       interval: 15s
       timeout: 5s
     restart: unless-stopped
-volumes:
+    volumes:
     -/nextcloud/cache:/bitnami/redis
-database:
+  database:
     build: ./postgresql
     environment:
       - POSTGRESQL_DATABASE=nextcloud
