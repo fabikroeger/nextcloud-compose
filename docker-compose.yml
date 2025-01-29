@@ -52,7 +52,7 @@ services:
         condition: service_healthy
     entrypoint: ["/notify_push.sh"]
     environment:
-      - NEXTCLOUD_URL=http://app 
+      - NEXTCLOUD_URL=http://ffaabbii.de
     image: app
     ports:
       - "7867:7867"
