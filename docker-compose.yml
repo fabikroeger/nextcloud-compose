@@ -9,16 +9,17 @@ services:
       imaginary:
         condition: service_healthy
     environment:
+      - PHP_MEMORY_LIMIT=1024M
+      - PHP_UPLOAD_LIMIT=1024G
       - NEXTCLOUD_ADMIN_USER=admin
       - NEXTCLOUD_ADMIN_PASSWORD=admin
       - NEXTCLOUD_TRUSTED_DOMAINS=webserver ffaabbii.de # Append your domain here
-      - TRUSTED_PROXIES=172.30.0.0/12
-    env_file:
-      - ./cache.env
-      - ./db.env
-      - ./nextcloud.env
-      - PHP_MEMORY_LIMIT=1024M
-      - PHP_UPLOAD_LIMIT=1024G
+      - TRUSTED_PROXIES=172.30.0.0/12 192.168.178.0.0/16
+      - POSTGRES_HOST=database
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=nextcloud
+      - REDIS_HOST=cache     
     healthcheck:
       test: curl -sSf http://localhost/status.php | jq -e '(.installed==true) and (.maintenance==false) and (.needsDbUpgrade==false)'
       start_period: 30s
@@ -30,7 +31,6 @@ services:
       - "55181:80"
     restart: unless-stopped
     volumes:
-      - /etc/localtime:/etc/localtime
       - /nextcloud_data:/var/www/html/data
       - /nextcloud/app:/var/www/html
       - /nextcloud/config:/var/www/html/config
@@ -52,12 +52,7 @@ services:
         condition: service_healthy
     entrypoint: ["/notify_push.sh"]
     environment:
-      - NEXTCLOUD_URL=http://webserver
-      - PORT=52192
-    image: nextcloud-app
-    ports:
-      - "52192:52192"
-      - NEXTCLOUD_URL=http://app
+      - NEXTCLOUD_URL=http://app 
     image: app
     ports:
       - "7867:7867"
@@ -66,16 +61,7 @@ restart: unless-stopped
     user: www-data
     volumes_from:
       - app
-  webserver:
-    build: ./nginx
-    depends_on:
-      app:
-        condition: service_started
-    ports:
-      - "55182:80"
-    restart: unless-stopped
-    volumes:
-      - app:/var/www/html:ro
+
   imaginary:
     build: ./imaginary
     environment:
@@ -86,6 +72,7 @@ restart: unless-stopped
       interval: 15s
       timeout: 5s
     restart: unless-stopped
+ 
   cache:
     build: ./redis
     environment:
@@ -98,15 +85,9 @@ restart: unless-stopped
       interval: 15s
       timeout: 5s
     restart: unless-stopped
-    volumes:
-      - db:/var/lib/postgresql/data
 volumes:
-  app:
-  config:
-  data:
-  db:
-      - /nextcloud/cache:/bitnami/redis
-  database:
+    -/nextcloud/cache:/bitnami/redis
+ database:
     build: ./postgresql
     environment:
       - POSTGRESQL_DATABASE=nextcloud
